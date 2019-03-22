@@ -1,20 +1,37 @@
-const request = require('request-promise');
+const requestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const Json2csvParser = require('json2csv').Parser;
+const request = require('request');
+
+/*
+  request library vs reques-promise
+  request library original node library for handling
+  requests.
+  request-promise is wrap around the request library
+  providing async await syntax
+*/
 
 // movie - The Silence of the Lambs
+// restructuring from array to object
+// useful when we want them to be dynamic
 const URLS = [
-  'https://www.imdb.com/title/tt0102926/?ref_=nv_sr_1',
-  'https://www.imdb.com/title/tt2267998/?ref_=nv_sr_1',
+  {
+    url: 'https://www.imdb.com/title/tt0102926/?ref_=nv_sr_1',
+    id: 'the_silence_of_the_lambs',
+  },
+  {
+    url: 'https://www.imdb.com/title/tt2267998/?ref_=nv_sr_1',
+    id: 'gone_girl',
+  },
 ];
 
 (async () => {
   let moviesData = [];
 
   for (let movie of URLS) {
-    const response = await request({
-      uri: movie,
+    const response = await requestPromise({
+      uri: movie.url,
       // request header for the page
       // using the header with request library
       // we spoof our application as a browser
@@ -65,6 +82,24 @@ const URLS = [
       releaseDate,
       genres,
     });
+
+    // get movie poster to local storage
+    // to download any file, first create a file stream
+    let file = fs.createWriteStream(`${movie.id}.jpg`);
+    // making request for the poster
+    let stream = request({
+      uri: poster,
+      header: {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'max-age=0',
+        'upgrade-insecure-requests': '1',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36',
+      },
+      gzip: true,
+    })
+      .pipe(file);
   }
 
   // write the movies data to a JSON file
@@ -75,12 +110,12 @@ const URLS = [
   // writing to CSV format
   // pick the fields to write to csv file
   // if you choose to get all fields, then this fields is not needed
-  const fields = ['title', 'rating'];
+  // const fields = ['title', 'rating'];
   // pass the fields to the json2csvParser
   // and parse the moviesData for those fields
-  const json2csvParser = new Json2csvParser({ fields });
-  const csv = json2csvParser.parse(moviesData);
+  // const json2csvParser = new Json2csvParser({ fields });
+  // const csv = json2csvParser.parse(moviesData);
   // write to csv file
-  fs.writeFileSync('./data.csv', csv, 'utf-8');
-  console.log(csv);
+  // fs.writeFileSync('./data.csv', csv, 'utf-8');
+  // console.log(csv);
 })();
