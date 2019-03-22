@@ -28,8 +28,27 @@ const URL = 'https://www.imdb.com/title/tt0102926/?ref_=nv_sr_1';
   });
   let $ = cheerio.load(response);
   // get title from h1
-  const title = $('div[class="title_wrapper"] > h1').text();
+  const title = $('div[class="title_wrapper"] > h1').text().trim();
   // excepted output - The Silence of the Lambs (1991)
   const rating = $('span[itemprop="ratingValue"]').text();
-  console.log(title, rating);
+  // get poster img link
+  const poster = $('div[class="poster"] > a > img').attr('src');
+  // get total ratings for the movie
+  // using javascript, document.querySelector('.imdbRating').children[1].firstChild.innerText
+  const totalRatings = $('div[class="imdbRating"] > a').text();
+  // get the release date
+  const releaseDate = $('a[title="See more release dates"]').text().trim();
+  // get genres for the movie in an array
+  const genres = [];
+  $('div[class="subtext"] a[href^="/search/"]').each((i, elm) => {
+    const genre = $(elm).text();
+    // get the individual genre names
+    genres.push(genre);
+  });
+  console.log(`Title: ${title}`);
+  console.log(`Ratings: ${rating}`);
+  console.log(`Poster: ${poster}`);
+  console.log(`Total Ratings: ${totalRatings}`);
+  console.log(`Release Date: ${releaseDate}`);
+  console.log(`Genres: ${genres}`);
 })();
