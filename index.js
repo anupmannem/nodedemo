@@ -41,8 +41,9 @@ const URL = 'https://www.imdb.com/title/tt0102926/?ref_=nv_sr_1';
   // get genres for the movie in an array
   const genres = [];
   $('div[class="subtext"] a[href^="/search/"]').each((i, elm) => {
-    const genre = $(elm).text();
     // get the individual genre names
+    const genre = $(elm).text();
+    // push each genre into the array
     genres.push(genre);
   });
   console.log(`Title: ${title}`);
