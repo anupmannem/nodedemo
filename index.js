@@ -1,6 +1,7 @@
 const request = require('request-promise');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const Json2csvParser = require('json2csv').Parser;
 
 // movie - The Silence of the Lambs
 const URLS = [
@@ -69,7 +70,17 @@ const URLS = [
   // write the movies data to a JSON file
   // sync will tell node to wait for this
   // to finish first, before moving ahead
-  fs.writeFileSync('./data.json', JSON.stringify(moviesData), 'utf-8');
+  // fs.writeFileSync('./data.json', JSON.stringify(moviesData), 'utf-8');
 
-  console.log(moviesData);
+  // writing to CSV format
+  // pick the fields to write to csv file
+  // if you choose to get all fields, then this fields is not needed
+  const fields = ['title', 'rating'];
+  // pass the fields to the json2csvParser
+  // and parse the moviesData for those fields
+  const json2csvParser = new Json2csvParser({ fields });
+  const csv = json2csvParser.parse(moviesData);
+  // write to csv file
+  fs.writeFileSync('./data.csv', csv, 'utf-8');
+  console.log(csv);
 })();
