@@ -18,6 +18,25 @@ const cheerio = require('cheerio');
   // parse through object.entry_data.ProfilePage[0].graphql.user
   // using es6 destructuing to get user property
   let { entry_data: { ProfilePage: { [0]: { graphql: { user } } } } } = JSON.parse(script_regex[1]);
+
+  // get posts from instagram user - 
+  // edges returns array of multiple objects
+  let { entry_data: { ProfilePage: { [0]: { graphql: { user: { edge_owner_to_timeline_media: { edges } } } } } } } = JSON.parse(script_regex[1]);
+  let posts = [];
+  // iterating over edges array to get the posts  
+  for (let edge of edges) {
+    let { node } = edge;  // get node from each edge
+    posts.push({
+      id: node.id,     // get node id
+      shortcode: node.shortcode,
+      timestamp: node.taken_at_timestamp,
+      likes: node.edge_liked_by.count,
+      comments: node.edge_media_to_comment.count,
+      video_views: node.video_view_count,
+      caption: node.edge_media_to_caption.edges[0].node.text,
+      image_url: node.display_url,
+    });
+  }
   // pick the required fields
   let instagram_data = {
     followers: user.edge_followed_by.count,
@@ -25,7 +44,11 @@ const cheerio = require('cheerio');
     uploads: user.edge_owner_to_timeline_media.count,
     full_name: user.full_name,
     picture_url: user.profile_pic_url_hd,
+    posts,
   };
 
   console.log(instagram_data);
+  // when using debugger, set a breakpoint at 
+  // this debugger, and inspect elements 
+  // debugger;
 })();
